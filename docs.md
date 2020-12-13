@@ -1,5 +1,5 @@
 # Introduction
-TMInterface is state-of-the-art TAS tool for Trackmania Nations and United Forever. It allows you to replay, analyze and modify runs to achieve faster runs and push the game to it's limits. It was never meant to be a tool for cheating or unfair play and this is why it comes with security features that doesn't allow for this. **Do not** ever use the tool if you intend to drive legitimate runs and compete on public leaderboards. Any run done with the tool will contain a special signature that flags the run as a tool assisted run, regardless if the tool injected inputs or not.
+TMInterface is state-of-the-art TAS tool for Trackmania Nations and United Forever. It allows you to replay, analyze and modify runs to achieve faster runs and push the game to it's limits. It was never meant to be a tool for cheating or unfair play and this is why it comes with security features that doesn't allow for this. **Do not** ever use the attempt to drive legitimate runs and compete on public leaderboards while running the game with the tool injected. Any run done with the tool will contain a special signature that flags the run as a tool assisted run, regardless if the tool injected inputs or not.
 
 # TMInterface Commands & Variables
 
@@ -159,7 +159,7 @@ This command can be used anytime after the simulation is done because TMInterfac
 
 * `bf_max_no_finish_streak` - If set, specifies how many tries it will take the script to reset back to the original solution when not finishing. This setting is only used when `bf_change_solution_chance` is set. By default this is `-1` which means disabled.
 
-* `bf_seach_forever` - If set to `true`, after finding a better time, the script will set the new inputs as original inputs and begin to search for a lower time than the previous one. The inputs will always be printed immediately after finding a faster time. By default this is `false`, which means the script will stop when a new time is found.
+* `bf_search_forever` - If set to `true`, after finding a better time, the script will set the new inputs as original inputs and begin to search for a lower time than the previous one. The inputs will always be printed immediately after finding a faster time. By default this is `false`, which means the script will stop when a new time is found.
 
 
 # TMInterface Scripts
@@ -226,7 +226,7 @@ bind f8 unload
 bind i toggle_info
 bind p toggle_speed
 bind n toggle_inputs # Bind "n" to toggle the inputs display
-set log_simulation false # Turn of information about simulation
+set log_simulation false # Turn off information about simulation
 ```
 
 # Action support within TMInterface
@@ -263,9 +263,9 @@ A TrackMania race starts with a countdown phase. The length of this phase is var
 
 In the countdown phase, no input is applied to the car but it is not guaranteed that the state of the car will not change. A specific start blockmix may push the car out of it's spawning position even in the countdown. This is why the countdown is always played out, even when the game simulates the run in validation. Changing the length of the countdown may also result in an invalid run depending on the map. This is because the state of roulette boosters is depending entirely on the current time. This is not random, but means that the game always needs to set proper state for the roulette boosters depending on the context for the run to be valid.
 
-In online play, the countdown time is variable and dependant on unknown factors.
+In online play, the countdown time is variable and dependent on unknown factors.
 
-After the countdown, at time `0` or simulation time `2600`, an `_FakeIsRaceRunning` event is added to signal the start of the race. No other events happen at this time. It is however possible for the game to emit events such as the `Respawn` before the running event.
+After the countdown, at time `0` or simulation time `2600`, an `_FakeIsRaceRunning` event is added to signal the start of the race. No other events happen at this time. It is however possible for the game to emit events such as `Respawn` before the running event.
 
 In the next tick `10`, it is now possible to emit events by the player. Events are always sorted by time, and stored from oldest to newest.
 
