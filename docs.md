@@ -113,6 +113,19 @@ This command can be used anytime after the simulation is done because TMInterfac
 
 * `toggle_editor` - Unfinished.
 
+### Bruteforce
+* `bf_add_trigger` - Adds a trigger to evaluate the car state when the car hits the specified trigger. The coordinates are specified using a format of: `x y z size_x size_y size_y`, all elements are in game units, where one platform block = 32x8x32 units.
+
+    Syntax & Example: `bf_add_trigger 500 40 500 32 8 32` - adds a trigger at position `[500 40 500]` of size `[32 8 32]`.
+
+* `bf_remove_trigger` - Removes a trigger from the trigger list, provided the index. To list all triggers and their indexes use `bf_triggers`.
+
+    Syntax & Example: `bf_remove_trigger 1` - removes the first trigger provided it was added previously.
+
+* `bf_triggers` - Lists all available triggers and their indexes.
+
+    Syntax & Example: `bf_triggers`
+
 ## Variables
 * `speed`  - Controls the speed of the entire game. You can use a float value to set the speed to a lower value than 1. Setting the speed to very high values like `100` may result in skipping inputs by the game which can cause desyncs. This is not because TMInterface cannot apply inputs at this speed, but because the game will intentionally stop reading input state at each tick. By default this is `1`.
 
@@ -145,12 +158,12 @@ This command can be used anytime after the simulation is done because TMInterfac
 
 * `random_seed` - Unfinished.
 * `background` - draws a solid background behind all the widgets, while covering the entire game's screen with a single color. Useful when wanting to key out certain elements like the input viewer. To set a new color, provide a hex value like `#FF0000` which is red: `set background #FF0000`.
-* `viz_type`- the vizualization style in which the viewer shows inputs. This can be one of the following:
+* `viz_type` - the vizualization style in which the viewer shows inputs. This can be one of the following:
     - `standard` - the standard input viewer
     - `joystick` - a circular joystick vizualization, used exclusively for analog inputs
 
 * `controller` - The controller that will be executed at simulation time. This can be:
-    - `bruteforce` - Whether or not to start the bruteforce script when validating a replay. To bruteforce a replay, one must export it for validation beforehand. Otherwise the simulation will be ended abruptly after the game notices that the inputs don't match the source replay. TMInterface will automatically open a standard output console alongside the game's window when bruteforcing, to print all relevant information and inputs if a better time is found. The script may be stopped at any point by pressing the Pause key on the keyboard.
+    - `bruteforce` - The bruteforce script. To bruteforce a replay, one must export it for validation beforehand. Otherwise the simulation will be ended abruptly after the game notices that the inputs don't match the source replay. TMInterface will automatically open a standard output console alongside the game's window when bruteforcing, to print all relevant information and inputs if a better time is found. The script may be stopped at any point by pressing the Pause key on the keyboard.
     - `none` - No controller.
 
 * `bf_print_cps` - Whether or not to print information about passed checkpoints when bruteforcing a replay.
@@ -191,6 +204,7 @@ The time is zero based, meaning `0` is the start of the run. Note however, that 
 - `press` - "presses" a provided key 
 - `rel` - "releases" a provided key
 - `steer` - steers the car with the provided value
+- `gas` - accelerates the car with provided value
 - `speed` - sets the specified speed in-game
 
 `[value]`: the actual event that has to be injected, this value is dependant on the action declared: 
@@ -199,11 +213,13 @@ The time is zero based, meaning `0` is the start of the run. Note however, that 
     - `down` - brake
     - `left` - steer left
     - `right` - steer right
-    - `enter` - respawn (warning: non-deterministic)
+    - `enter` - respawn
 
 * `steer` - the value is an integer in the range of `[-65536,65535]` and represents how much the car will steer and it's direction. A negative value represents a steer to the right and a positive value, steer to the left. A `0` value means no steer. This range is the "normal" range that is possible to actually produce by real hardware but an extended range is available with TMInterface of `[-8388480, 8388608]`. Note however that using a value outside of the normal range would be considered a run that is not physically possible with physical hardware, therefore, cheating. This range is only possible because of the internal representation used by the game.
 
-* `speed` - an float multiplier that controls the speed of the game. This is useful when the script is getting pretty long and it's unpractical to wait for the race to get to a point where the script ends. Keep in mind however that large speed values may lead to de-syncs. This is not a result of TMInterface not keeping up with the game timer but rather that the game will intentionally stop reading input state at each tick. 
+* `gas` - the value is an integer in the range of `[-65536,65535]` and represents how much the car will accelerate or brake. Note that TMNF/TMUF do not support analog acceleration. The action can still be emitted but the a larger or smaller value will not change the strength of the car acceleration. The exact value at which the car starts accelerating is `-19661` and for braking `19661`.
+
+* `speed` - a float multiplier that controls the speed of the game. This is useful when the script is getting pretty long and it's unpractical to wait for the race to get to a point where the script ends. Keep in mind however that large speed values may lead to de-syncs. This is not a result of TMInterface not keeping up with the game timer but rather that the game will intentionally stop reading input state at each tick. 
 
 Some examples of commands:
 * `2510 press up` - accelerates the car at 2.51 seconds
@@ -245,11 +261,9 @@ set log_simulation false # Turn off information about simulation
 
 # Action support within TMInterface
 * Some actions within scripts may require external, additional setup for them to work properly.
-The `steer` command will only work when the game detects a gamepad and the input for analog steer is bound in the Profile -> Inputs menu. If you do not own a physical gamepad or joystick device, you can emulate it on your system using e.g [VJoy](http://vjoystick.sourceforge.net/site/index.php/download-a-install/download).
+The `steer` and `gas` command will only work when the game detects a gamepad and the input for analog steer is bound in the Profile -> Inputs menu. If you do not own a physical gamepad or joystick device, you can emulate it on your system using e.g [VJoy](http://vjoystick.sourceforge.net/site/index.php/download-a-install/download).
 
-* Respawn and race reset actions are fully supported, deterministic actions.
-
-* The `Accelerate (analog)` event is not a supported event yet.
+* Respawn and race reset actions are fully supported, deterministic actions, TMInterface uses native game functions to provide this functionality.
 
 # TMInterface Server and API
 TODO
