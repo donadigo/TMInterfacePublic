@@ -98,6 +98,17 @@ This command can be used anytime after the simulation is done because TMInterfac
 
     Syntax & Example: `dump_inputs`
 
+* `recover_inputs` - Recovers inputs from the current race in run mode. This command is useful when it is not possible to finish the run to save the inputs. The command will print out all the inputs that happened until the current time and copy them into the clipboard, just like `dump_inputs`.
+
+### Cheats
+* `tp` - Teleports the car to a specfified X Y Z coordinates. This command invalidates the run.
+
+    Syntax & Example: `tp 500 9 500` - teleports the car to X: 500, Y: 9, Z: 500
+
+* `warp` - Changes the race time to a specified time in milliseconds. The value is clamped to a range of `[-2147483640, 2147483640]`. This command invalidates the run.
+
+    Syntax & Example: `warp 15510` - changes the race time to 15.51 seconds ingame
+
 ### Widgets
 * `toggle_info` - Toggles an info window that displays the raw vectors of position, velocity and the rotation of the car. The command will show the window if it is currently hidden and hide it otherwise.
 
@@ -149,15 +160,22 @@ This command can be used anytime after the simulation is done because TMInterfac
 
 * `draw_game` - Disables or enables drawing of the game. Setting this to `false` will not disable drawing of widgets provided by TMInterface or the console itself. By default this is `true`.
 
-* `simulation_priority` - Specifies what process priority should be used for the game process when a simulation is playing out. The following values are available:
+* `sim_priority` - Specifies what process priority should be used for the game process when a simulation is playing out. The following values are available:
     - `none` - normal priority
     - `high` - high priority
     - `realtime` - realtime priority
 
     By default this is `none`.
 
+* `sim_debug` - Enables a debug mode for simulations in which the game runs all game-related systems, such as input, graphics and sound. In this mode TMInterface will
+enable the game camera and perform modifications in the game scene to make it able to view the simulation play-out live. Note that in debug mode, the simulation will take longer time because of additional overhead. You can modify the simulation speed by setting `sim_speed`.
+
+* `sim_speed` - Modifies the simulation speed in debug mode. This is not the same as the `speed` variable, which controls the speed of the entire game. By default, this is equal to `5` which is also what the game uses for simulation by default. This variable does not affect anything when `sim_debug` is `false`.
+
+* `sim_show_valid_window` - If set to `false`, TMInterface will hide the "Validating" message window while simulating the race. `true` by default.
+
 * `random_seed` - Unfinished.
-* `background` - draws a solid background behind all the widgets, while covering the entire game's screen with a single color. Useful when wanting to key out certain elements like the input viewer. To set a new color, provide a hex value like `#FF0000` which is red: `set background #FF0000`.
+* `background` - Draws a solid background behind all the widgets, while covering the entire game's screen with a single color. Useful when wanting to key out certain elements like the input viewer. To set a new color, provide a hex value like `#FF0000` which is red: `set background #FF0000`.
 * `viz_type` - the vizualization style in which the viewer shows inputs. This can be one of the following:
     - `standard` - the standard input viewer
     - `joystick` - a circular joystick vizualization, used exclusively for analog inputs
@@ -215,9 +233,9 @@ The time is zero based, meaning `0` is the start of the run. Note however, that 
     - `right` - steer right
     - `enter` - respawn
 
-* `steer` - the value is an integer in the range of `[-65536,65535]` and represents how much the car will steer and it's direction. A negative value represents a steer to the right and a positive value, steer to the left. A `0` value means no steer. This range is the "normal" range that is possible to actually produce by real hardware but an extended range is available with TMInterface of `[-8388480, 8388608]`. Note however that using a value outside of the normal range would be considered a run that is not physically possible with physical hardware, therefore, cheating. This range is only possible because of the internal representation used by the game.
+* `steer` - the value is an integer in the range of `[-65536,65536]` and represents how much the car will steer and it's direction. A negative value represents a steer to the left and a positive value, steer to the right. A `0` value means no steer. This range is the "normal" range that is possible to actually produce by real hardware but an extended range is available with TMInterface of `[-6553600, 6553600]`. Note however that using a value outside of the normal range would be considered a run that is not physically possible with physical hardware, therefore, cheating. This range is only possible because of the internal representation used by the game.
 
-* `gas` - the value is an integer in the range of `[-65536,65535]` and represents how much the car will accelerate or brake. Note that TMNF/TMUF do not support analog acceleration. The action can still be emitted but the a larger or smaller value will not change the strength of the car acceleration. The exact value at which the car starts accelerating is `-19661` and for braking `19661`.
+* `gas` - the value is an integer in the range of `[-65536,65536]` and represents how much the car will accelerate or brake. Note that TMNF/TMUF do not support analog acceleration. The action can still be emitted but the a larger or smaller value will not change the strength of the car acceleration. The exact value at which the car starts accelerating is `-19661` and for braking `19661`.
 
 * `speed` - a float multiplier that controls the speed of the game. This is useful when the script is getting pretty long and it's unpractical to wait for the race to get to a point where the script ends. Keep in mind however that large speed values may lead to de-syncs. This is not a result of TMInterface not keeping up with the game timer but rather that the game will intentionally stop reading input state at each tick. 
 
