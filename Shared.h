@@ -54,14 +54,11 @@ enum class MessageType : uint32_t
 	 */
 	S_ON_SIM_STEP,
 	/**
-	 * S_ON_SIM_AFTER_STEP: server call to client that signifies a the end of a simulation step.
-	 * This call only applies to simulation context.
-	 *
-	 * This will be only called when feature mode is SIMULATION.
-	 * Client must respond with C_PROCESSED_CALL and the message type of S_ON_SIM_AFTER_STEP.
-	 * Data: CallOnRunStepData
+	 * S_ON_SIM_END: server call to client that signifies the end of the simulation session.
+	 * Client must respond with C_PROCESSED_CALL and the message type of S_ON_SIM_END.
+	 * Data: EmptyData
 	 */
-	S_ON_SIM_AFTER_STEP,
+	S_ON_SIM_END,
 	/**
 	 * S_ON_CHECKPOINT_COUNT_CHANGED: server call to client that signifies that checkpoint state changed.
 	 *
@@ -114,24 +111,23 @@ enum class MessageType : uint32_t
 	 */
 	C_PROCESSED_CALL,
 	/**
-	 * C_SET_KEY_STATES: client call to server to set key states ingame.
+	 * C_SET_INPUT_STATES: client call to server to set input states ingame.
 	 * This call only applies to run context.
 	 * 
-	 * Sets individual key states for the car. If successfully applied,
+	 * Sets individual input states for the car. If successfully applied,
 	 * key states are guaranteed to be applied at next step of the run.
-	 * If you want to apply a key state that happens at 500ms, call
+	 * If you want to apply an input state that happens at 500ms, call
 	 * send this message at 490ms (one step before).
-	 * Data: SetKeyStatesData
+	 * Data: SetInputStatesData
 	 */
-	C_SET_KEY_STATES,
+	C_SET_INPUT_STATES,
 	/**
 	 * C_RESPAWN: client call to server to respawn ingame.
 	 * This call only applies to run context.
 	 *
-	 * Respawns the car immediately and responds when the input was sent.
-	 * Keep in mind that this action is not fully supported because
-	 * the input is sent through Windows API. It is not guaranteed
-	 * that the input will be injected in time for the current game time.
+	 * Queues a deterministic respawn at the next race tick. This function
+	 * will not immediately call the game to respawn the car, as TMInterface
+	 * has to call the specific function at a specific place in the game loop.
 	 * Data: EmptyData
 	 */
 	C_RESPAWN,
@@ -151,7 +147,7 @@ enum class MessageType : uint32_t
 	 * function will rewind to the state at that time.
 	 * Data: SimRewindToTimeData
 	 */
-	C_SIM_REWIND_TO_TIME,
+	//C_SIM_REWIND_TO_TIME, TODO!!!!
 	/**
 	 * C_SIM_GET_STATE: client call to server to retrieve current simulation state.
 	 *
@@ -226,11 +222,21 @@ enum class MessageType : uint32_t
 	 * C_SET_GAME_SPEED: client call to server to set current game speed.
 	 *
 	 * Sets the game speed to the sent value. This affects the entirety of
-	 * the game. Inputs set using C_SET_KEY_STATES will work correctly across
-	 * most speeds, however C_RESPAWN may not work correctly depending on the speed applied.
+	 * the game. Higher speed may affect the ability to replay inputs, this however
+	 * is caused by the game not processing inputs, rather than any desyncing happening
+	 * between TMInterface and the game client.
 	 * Data: SetGameSpeedData
 	 */
 	C_SET_GAME_SPEED,
+	/**
+	 * C_EXECUTE_COMMAND: client call to server to execute an interface command
+	 * 
+	 * Adds an interface command to the internal command queue. The command will not
+	 * be immediately executed, rather, it'll be executed when the current queue is processed
+	 * on the next game frame.
+	 * Data: ExecuteCommandData
+	 */
+	C_EXECUTE_COMMAND,
 	/**
 	 * C_SET_EXECUTE_COMMANDS: client call to server to toggle executing commands.
 	 *
@@ -262,20 +268,20 @@ inline constexpr std::ostream& operator<<(std::ostream& os, const MessageType ty
 		ENUMSTR(S_ON_RUN_STEP)
 		ENUMSTR(S_ON_SIM_BEGIN)
 		ENUMSTR(S_ON_SIM_STEP)
-		ENUMSTR(S_ON_SIM_AFTER_STEP)
 		ENUMSTR(S_ON_CHECKPOINT_COUNT_CHANGED)
 		ENUMSTR(S_ON_LAPS_COUNT_CHANGED)
 		ENUMSTR(C_REGISTER)
 		ENUMSTR(C_DEREGISTER)
 		ENUMSTR(C_PROCESSED_CALL)
 		ENUMSTR(C_GET_CONTEXT_MODE)
-		ENUMSTR(C_SET_KEY_STATES)
+		ENUMSTR(C_SET_INPUT_STATES)
+		ENUMSTR(C_RESPAWN)
 		ENUMSTR(C_SIM_REWIND_TO_STATE)
-		ENUMSTR(C_SIM_REWIND_TO_TIME)
 		ENUMSTR(C_SIM_GET_STATE)
 		ENUMSTR(C_SIM_GET_EVENT_BUFFER)
 		ENUMSTR(C_SIM_SET_EVENT_BUFFER)
 		ENUMSTR(C_SET_GAME_SPEED)
+		ENUMSTR(C_EXECUTE_COMMAND)
 		ENUMSTR(C_SET_EXECUTE_COMMANDS)
 		ENUMSTR(C_SET_TIMEOUT)
 		ENUMSTR(ANY)
@@ -286,6 +292,13 @@ inline constexpr std::ostream& operator<<(std::ostream& os, const MessageType ty
 #undef ENUMSTR
 	return os;
 }
+
+enum SimValidationResult
+{
+	INVALID = 0,
+	VALID = 1,
+	WRONG_SIMULATION = 2
+};
 
 struct EmptyData
 {
@@ -302,13 +315,15 @@ struct GetContextModeData
 	ContextMode mode = ContextMode::RUN;
 };
 
-struct SetKeyStatesData
+// TODO: revise this, add gas and fix type of steer (or not)
+struct SetInputStatesData
 {
 	int32_t left = -1;
 	int32_t right = -1;
 	int32_t up = -1;
 	int32_t down = -1;
 	int32_t steer = MAXINT32;
+	int32_t gas = MAXINT32;
 };
 
 struct SimRewindToTimeData
@@ -319,6 +334,13 @@ struct SimRewindToTimeData
 struct SetGameSpeedData
 {
 	double speed = 1.0;
+};
+
+struct ExecuteCommandData
+{
+	int32_t reserved;
+	// size_t commandSize;
+	// dynamic: char[commandSize]
 };
 
 struct SetExecuteCommandsData
@@ -341,15 +363,20 @@ struct CallOnSimStepData
 	uint32_t time = 0;
 };
 
+struct CallOnSimEndData
+{
+	uint32_t result = 0;
+};
+
 struct CallOnCheckpointCountChangedData
 {
-	int current = 0;
-	int target = 0;
+	UInt32 current = 0;
+	UInt32 target = 0;
 };
 
 struct CallOnLapsCountChangedData
 {
-	int current = 0;
+	UInt32 current = 0;
 };
 
 enum SimStateFlags
@@ -360,29 +387,38 @@ enum SimStateFlags
 	HAS_STATE_3 = 0x8,
 	HAS_STATE_4 = 0x10,
 	HAS_CMD_BUFFER_CORE = 0x20,
-	HAS_INPUT_STATE = 0x40
+	HAS_INPUT_STATE = 0x40,
+	HAS_PLAYER_INFO = 0x80
 };
 
 struct SimStateData
 {
-	uint32_t flags = 0;
-	int32_t eventHistorySize = -1;
-	int32_t currentHistoryIndex = -1;
+	UInt32 contextMode = 0;
+	UInt32 flags = 0;
 	std::array<unsigned char, 212> timers{};
 	std::array<unsigned char, 820> state1{};
 	std::array<unsigned char, 2180> state2{};
 	std::array<unsigned char, 3056> state3{};
 	std::array<unsigned char, 72> state4{};
 	std::array<unsigned char, 256> cmdBufferCore{};
-	std::array<unsigned char, 120> inputState{};
-	int32_t currentCpCount = 0;
-	int32_t currentLapsCount = 0;
+	std::array<unsigned char, 944> playerInfo{};
+
+	int inputRunningState = 0;
+	int inputFinishState = 0;
+	int inputAccelerateState = 0;
+	int inputBrakeState = 0;
+	int inputLeftState = 0;
+	int inputRightState = 0;
+	int inputSteerState = 0;
+	int inputGasState = 0;
+	UInt32 numRespawns = 0;
+
 	// uint32_t cpStatesSize;
 	// dynamic: uint32_t[cpStatesSize]
 	// uint32_t cpTimesSize;
 	// dynamic: TMCheckpoint[cpTimesSize]
 
-	int getTime() const
+	int GetTime() const
 	{
 		return *(int*)(&timers[0x4]);
 	}
@@ -402,8 +438,8 @@ struct ControlNamesData
 
 struct CheckpointData
 {
-	int32_t currentCpCount = 0;
-	int32_t currentLapsCount = 0;
+	UInt32 currentCpCount = 0;
+	UInt32 currentLapsCount = 0;
 	// uint32_t cpStatesSize;
 	// dynamic: uint32_t[cpStatesSize]
 	// uint32_t cpTimesSize;
@@ -414,7 +450,7 @@ struct SimEventBufferData
 {
 	unsigned eventsDuration = 0;
 	// uint32_t eventsSize;
-	// dynamic: TMEvent[eventsSize]
+	// dynamic: CInputEvent[eventsSize]
 };
 
 enum ErrorCode

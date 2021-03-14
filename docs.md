@@ -284,7 +284,23 @@ The `steer` and `gas` command will only work when the game detects a gamepad and
 * Respawn and race reset actions are fully supported, deterministic actions, TMInterface uses native game functions to provide this functionality.
 
 # TMInterface Server and API
-TODO
+TMInterface allows for external simulation control via the server API. The API allows to connect to a game instance running with TMInterface and interrupt
+important game functions such as the physics step. A script can connect to as many instances of TMInterface as it wants, and one TMInterface instance can have only one
+client controlling it. There can be a maximum of 16 TMInterface instances running on one system. Scripts can call the API to execute console commands, analyze / override simulation state and inject inputs. 
+
+## Interprocess communication & message system
+TMInterface uses a mapped memory buffer to communicate with the script that's currently connnected to the instance. The memory buffer is used to send / receive
+messages by both, the server and the client. A message is a raw data buffer, typically represented by a native C++ struct. Each message has its own type, error code
+and the actual message data. All struct types and layouts are described in `Shared.h`. A message can be:
+* a server call (message type prefixed by `S_`) which is a synchronous call to the script that has
+to get answered by another message from the client `C_PROCESSED_CALL`.
+Such calls are completely synchronous, meaning that at this time, 
+no game code is executed. If the script is not answering in a defined time window, TMInterface
+will skip the response and automatically deregister the client
+* a client call which modifies the game state or retrieves it,
+such as the simulation state (message type prefixed by `C_`). Such calls are picked up by the internal server thread. They can be only sent when in a server call, never outside of it
+
+For more information for each call, refer to `Shared.h`.
 
 # TMInterface Innerworkings
 This section describes internal game structures and how the game works internally.
