@@ -1,5 +1,5 @@
 # Introduction
-TMInterface is state-of-the-art TAS tool for Trackmania Nations and United Forever. It allows you to replay, analyze and modify runs to achieve faster runs and push the game to it's limits. It was never meant to be a tool for cheating or unfair play and this is why it comes with security features that doesn't allow for this. **Do not** ever attempt to drive legitimate runs and compete on public leaderboards while running the game with the tool injected. Any run done with the tool will contain a special signature that flags the run as a tool assisted run, regardless if the tool injected inputs or not.
+TMInterface is a state-of-the-art TAS tool for Trackmania Nations and United Forever. It allows you to replay, analyze and modify runs to achieve faster runs and push the game to its limits. It was never meant to be a tool for cheating or unfair play and this is why it comes with security features that don't allow for this. **Do not** ever attempt to drive legitimate runs and compete on public leaderboards while running the game with the tool injected. Any run done with the tool will contain a special signature that flags the run as a tool assisted run, regardless if the tool injected inputs or not.
 
 # TMInterface Commands & Variables
 
@@ -13,7 +13,7 @@ TMInterface is state-of-the-art TAS tool for Trackmania Nations and United Forev
 
     Syntax & Example: `quit`
 
-* `set` - Sets a variable within TMInterface. Setting custom variables is not supported at the moment. If no value is provided, the variable is reset back to it's default value.
+* `set` - Sets a variable within TMInterface. Setting custom variables is not supported at the moment. If no value is provided, the variable is reset back to its default value.
 
     Syntax: `set [variable_name] [value]`
 
@@ -37,13 +37,13 @@ TMInterface is state-of-the-art TAS tool for Trackmania Nations and United Forev
 
     Example: `sleep 0.3` - Sleep 0.3 seconds.
 
-* `bind` - Binds a key to a user-defined command. A key can be bound to a command made of multiple commands as well separating them by a `;`. For function keys use `f1` to `f16` as the key string.
+* `bind` - Binds a key to a user-defined command. A key can be bound to a command made of multiple commands as well by separating them with a `;`. For function keys use `f1` to `f16` as the key string.
 
     Syntax: `bind [key] [command]`
 
     Example: `bind u unload` - Binds the u key to the `unload` command.
 
-    Example: `bind f2 set speed 2` - Binds the F2 key to double speed of the game.
+    Example: `bind f2 set speed 2` - Binds the F2 key to double the speed of the game.
 
     Example: `bind 0 set execute_commands false; set speed 1` - Binds the 0 key to set `execute_commands` to false and reset the speed.
 
@@ -57,11 +57,11 @@ TMInterface is state-of-the-art TAS tool for Trackmania Nations and United Forev
 
     Syntax & Example: `open_scripts_folder`
 
-* `open_stdout` - Opens the interal console used for standard output. This is not the interface console seen in game and is mostly used for outputting data when bruteforcing a replay.
+* `open_stdout` - Opens the internal console used for standard output. This is not the interface console seen in game and is mostly used for outputting data when bruteforcing a replay.
 
     Syntax & Example: `open_stdout`
 
-* `load_infinity` - Loads TMInfinity into the existing game client. Note that this command should only ever be executed at the beggining, in the profile menu and not anywhere else.
+* `load_infinity` - Loads TMInfinity into the existing game client. Note that this command should only ever be executed at the beginning, in the profile menu and not anywhere else.
 
     Syntax & Example : `load_infinity`
 
@@ -85,7 +85,7 @@ This command can be used anytime after the simulation is done because TMInterfac
 
     Syntax: `replay [time to stop in milliseconds]`
 
-    Example: `replay` - replays the validation file in it's entirety.
+    Example: `replay` - replays the validation file in its entirety.
 
     Example: `replay 30000` - replays validation file only to 30s. After that, the control is handed back to the player.
 
@@ -101,7 +101,7 @@ This command can be used anytime after the simulation is done because TMInterfac
 * `recover_inputs` - Recovers inputs from the current race in run mode. This command is useful when it is not possible to finish the run to save the inputs. The command will print out all the inputs that happened until the current time and copy them into the clipboard, just like `dump_inputs`.
 
 ### Cheats
-* `tp` - Teleports the car to a specfified X Y Z coordinates. This command invalidates the run.
+* `tp` - Teleports the car to a specified X Y Z coordinate. This command invalidates the run.
 
     Syntax & Example: `tp 500 9 500` - teleports the car to X: 500, Y: 9, Z: 500
 
@@ -125,7 +125,7 @@ This command can be used anytime after the simulation is done because TMInterfac
 * `toggle_editor` - Unfinished.
 
 ### Bruteforce
-* `bf_add_trigger` - Adds a trigger to evaluate the car state when the car hits the specified trigger. The coordinates are specified using a format of: `x y z size_x size_y size_y`, all elements are in game units, where one platform block = 32x8x32 units.
+* `bf_add_trigger` - Adds a trigger to evaluate the car state when the car hits the specified trigger. The coordinates are specified using a format of: `x y z size_x size_y size_y`, all elements are in game units, where one platform block = 32x8x32 units. The `toggle_info` command can be used to obtain the coordinates at a desired point.
 
     Syntax & Example: `bf_add_trigger 500 40 500 32 8 32` - adds a trigger at position `[500 40 500]` of size `[32 8 32]`.
 
@@ -140,7 +140,7 @@ This command can be used anytime after the simulation is done because TMInterfac
 ## Variables
 * `speed`  - Controls the speed of the entire game. You can use a float value to set the speed to a lower value than 1. Setting the speed to very high values like `100` may result in skipping inputs by the game which can cause desyncs. This is not because TMInterface cannot apply inputs at this speed, but because the game will intentionally stop reading input state at each tick. By default this is `1`.
 
-* `replay_speed` - Controls the speed of the game while replaying inputs loaded with a `replay` command. The speed will be automatically managed when using `replay` command to allow for quick run resetting & attempts. The speed will be applied at the beggining of the run and reset 1 second before the specified time used in the `replay` command. If no time specified, the speed will not be reset. By default this is `1`.
+* `replay_speed` - Controls the speed of the game while replaying inputs loaded with a `replay` command. The speed will be automatically managed when using the `replay` command to allow for quick run resetting & attempts. The speed will be applied at the beginning of the run and reset 1 second before the specified time used in the `replay` command. If no time specified, the speed will not be reset. By default this is `1`.
 
 * `countdown_speed` - Controls the speed of the countdown phase. The speed will be automatically applied only for the countdown, simulating a faster countdown seen in TM2020. Note that this is not modifying the internal countdown time offset and only setting the global speed. The former is possible but not desired, since it affects the physics in some cases. By default this is `5`.
 
@@ -149,10 +149,10 @@ This command can be used anytime after the simulation is done because TMInterfac
 * `execute_commands` - Whether or not TMInterface should inject inputs that are currently loaded with `load` or `replay`. By default this is `true`. Set to `false` to disable input replaying.
 
 * `log_simulation` - Prints information in the console about the simulation / race events. These events include: 
-    - Beggining a new simulation
+    - Beginning a new simulation
     - Ending a simulation
     - Passing through a checkpoint
-    - Beggining a new lap
+    - Beginning a new lap
     - Finishing the race
     - Message signaling that the run was driven with TMInterface
 
@@ -190,7 +190,7 @@ enable the game camera and perform modifications in the game scene to make it ab
 
 * `bf_modify_chance` - The chance that a steer input may get modified. This chance is used for each and every input that exists in the replay. By default this is `0.002` which is 0.2%.
 
-* `bf_change_solution_chance` - The chance that a solution may be changed from the original replay. If it gets changed, the inputs will be changed based on a new solution, regardless of it's result. By default this is `0`, which means disabled.
+* `bf_change_solution_chance` - The chance that a solution may be changed from the original replay. If it gets changed, the inputs will be changed based on a new solution, regardless of its result. By default this is `0`, which means disabled.
 
 * `bf_max_steer_diff` - The maximum difference that a steer value may be changed by in either direction. If the resulting steer falls out of the normal range, it's discarded. By default this is `10000`.
 
@@ -209,7 +209,7 @@ enable the game camera and perform modifications in the game scene to make it ab
 
 # TMInterface Scripts
 ## Input scripts
-An input script is used to program runs in Trackmania and it's contents are parsed by TMIntrface to be replayed in the game deterministically. The script file usually has a `.txt` extension and each input occupies one line of the script. The script can contain empty lines and lines prepended with a `#` are comments and are ignored by the parser. A comment may also be inserted just after the command.
+An input script is used to program runs in Trackmania and its contents are parsed by TMIntrface to be replayed in the game deterministically. The script file usually has a `.txt` extension and each input occupies one line of the script. The script can contain empty lines and lines prepended with a `#` are comments and are ignored by the parser. A comment may also be inserted just after the command.
 
 The format of an input looks like this:
 `[time range in milliseconds] [action] [value]`
@@ -225,7 +225,7 @@ The time is zero based, meaning `0` is the start of the run. Note however, that 
 - `gas` - accelerates the car with provided value
 - `speed` - sets the specified speed in-game
 
-`[value]`: the actual event that has to be injected, this value is dependant on the action declared: 
+`[value]`: the actual event that has to be injected, this value is dependent on the action declared: 
 * `press` and `rel`: 
     - `up` - accelerate
     - `down` - brake
@@ -233,7 +233,7 @@ The time is zero based, meaning `0` is the start of the run. Note however, that 
     - `right` - steer right
     - `enter` - respawn
 
-* `steer` - the value is an integer in the range of `[-65536,65536]` and represents how much the car will steer and it's direction. A negative value represents a steer to the left and a positive value, steer to the right. A `0` value means no steer. This range is the "normal" range that is possible to actually produce by real hardware but an extended range is available with TMInterface of `[-6553600, 6553600]`. Note however that using a value outside of the normal range would be considered a run that is not physically possible with physical hardware, therefore, cheating. This range is only possible because of the internal representation used by the game.
+* `steer` - the value is an integer in the range of `[-65536,65536]` and represents how much the car will steer and its direction. A negative value represents a steer to the left and a positive value, steer to the right. A `0` value means no steer. This range is the "normal" range that is possible to actually produce by real hardware but an extended range is available with TMInterface of `[-6553600, 6553600]`. Note however that using a value outside of the normal range would be considered a run that is not physically possible with physical hardware, therefore, cheating. This range is only possible because of the internal representation used by the game.
 
 * `gas` - the value is an integer in the range of `[-65536,65536]` and represents how much the car will accelerate or brake. Note that TMNF/TMUF do not support analog acceleration. The action can still be emitted but the a larger or smaller value will not change the strength of the car acceleration. The exact value at which the car starts accelerating is `-19661` and for braking `19661`.
 
@@ -323,7 +323,7 @@ A TrackMania race starts with a countdown phase. The length of this phase is var
 * Validate mode: 2600ms
 * Online: variable
 
-In the countdown phase, no input is applied to the car but it is not guaranteed that the state of the car will not change. A specific start blockmix may push the car out of it's spawning position even in the countdown. This is why the countdown is always played out, even when the game simulates the race in validation. Changing the length of the countdown may also result in an invalid run depending on the map. This is because the state of roulette boosters is depending entirely on the current time. This is not random, but means that the game always needs to set proper state for the roulette boosters depending on the context for the race to be valid.
+In the countdown phase, no input is applied to the car but it is not guaranteed that the state of the car will not change. A specific start blockmix may push the car out of its spawning position even in the countdown. This is why the countdown is always played out, even when the game simulates the race in validation. Changing the length of the countdown may also result in an invalid run depending on the map. This is because the state of roulette boosters is depending entirely on the current time. This is not random, but means that the game always needs to set the proper state for the roulette boosters depending on the context for the race to be valid.
 
 In online play, the countdown time is variable and dependent on unknown factors.
 
