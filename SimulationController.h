@@ -1,48 +1,49 @@
+/* Copyright Adam Bieñkowski <donadigos159@gmail.com> - All Rights Reserved
+ * Unauthorized redistribution and copying of this software and its source code via any medium is strictly prohibited.
+ * Proprietary and confidential.
+ */
+
 #pragma once
 #include <memory>
-#include "GameEventBuffer.h"
+#include "MwFoundations.h"
+#include "SimulationManager.h"
 
 class SimulationController
 {
 public:
 	SimulationController();
 	virtual ~SimulationController();
-	virtual void onRunStep(const int time)
+	virtual void OnRunStep(SimulationManager& simManager, const int time)
 	{
 
 	}
 
-	virtual void onSimulationBegin()
+	virtual void OnSimulationBegin(SimulationManager& simManager)
 	{
 
 	}
 
-	virtual void onSimulationEnd()
+	virtual void OnSimulationEnd(SimulationManager& simManager, const uint32_t result)
 	{
 
 	}
 
-	virtual bool onSimulationStep(const int time)
-	{
-		return true;
-	}
-
-	virtual void onAfterSimulationStep()
+	virtual void OnSimulationStep(SimulationManager& simManager, const int time)
 	{
 
 	}
 
-	virtual void onGameInputBufferAvailable(GameEventBuffer& inputBuffer)
+	virtual void OnInputRace(SimulationManager& simManager)
 	{
 
 	}
 
-	virtual void onRaceFinished() 
+	virtual void OnRaceFinished(SimulationManager& simManager)
 	{
 
 	}
 
-	virtual void onCheckpointCountChanged() 
+	virtual void OnCheckpointCountChanged(SimulationManager& simManager)
 	{
 
 	}

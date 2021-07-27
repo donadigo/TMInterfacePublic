@@ -1,97 +1,81 @@
+/* Copyright Adam Bieñkowski <donadigos159@gmail.com> - All Rights Reserved
+ * Unauthorized redistribution and copying of this software and its source code via any medium is strictly prohibited.
+ * Proprietary and confidential.
+ */
+
 #pragma once
-#include "TMInterfaceImpl.h"
 #include "SimulationController.h"
+#include "SimulationManager.h"
+#include "TriggerManager.h"
 #include <math.h>
 #include <algorithm>
 #include <random>
-
-enum SAPhase
-{
-	INITIAL,
-	SEARCH
-};
-
-struct TriggerHit
-{
-	int time;
-	float distance;
-
-	TriggerHit(int time, float distance) :
-		time(time), distance(distance)
-	{
-
-	}
-
-	friend std::ostream& operator<<(std::ostream& os, const TriggerHit& hit)
-	{
-		os << "TriggerHit{" << hit.time << " (" << hit.distance << ")}";
-		return os;
-	}
-
-
-	bool operator<(const TriggerHit& hit) const
-	{
-		if (time < hit.time) {
-			return true;
-		}
-
-		if (time == hit.time && distance < hit.distance) {
-			return true;
-		}
-
-		return false;
-	}
-};
+#include <fmt/format.h>
 
 class BFSearchController : public SimulationController
 {
 public:
 	BFSearchController();
+	~BFSearchController() = default;
 
-	void onSimulationBegin();
-	void onSimulationEnd();
-	bool onSimulationStep(const int time);
-	void onAfterSimulationStep() {}
-
-	void onGameInputBufferAvailable(GameEventBuffer& inputBuffer) {}
-
-	void onCheckpointCountChanged();
+	void OnSimulationBegin(SimulationManager& simManager) override;
+	void OnSimulationEnd(SimulationManager& simManager, const uint32_t result) override;
+	void OnSimulationStep(SimulationManager& simManager, const int time) override;
+	void OnCheckpointCountChanged(SimulationManager& simManager) override;
 private:
-	SAPhase m_phase = INITIAL;
-	MemSimulationState m_startState;
+	BFPhase m_phase = BFPhase::kInitial;
+	BFTarget m_userTarget = BFTarget::kFinishTime;
+	int m_userTargetTrigger = -1;
+	int m_userTargetCheckpoint = -1;
+
 	std::vector<TMEvent> m_originalInputs;
 	std::vector<TMEvent> m_currentInputs;
-	std::vector<TMEvent> extendedStorageInputs;
 	std::vector<int> m_currentCpTimes;
 	std::vector<int> m_targetCpTimes;
 
-	std::vector<Trigger3D> m_customTriggers;
-	std::vector<TriggerHit> m_currentTriggerTimes;
-	std::vector<TriggerHit> m_targetTriggerTimes;
-	int m_currentTrigger = 0;
+	std::vector<TriggerHit> m_currentTriggerHits;
+	std::vector<TriggerHit> m_targetTriggerHits;
+	Trigger3D* m_currentTrigger = nullptr;
 
 	int m_bestTime = -1;
-	int m_iterations = 0;
-	int m_modified = 0;
-	int m_noFinishStreak = 0;
+	unsigned m_modified = 0;
+	unsigned m_iterations = 0;
+	unsigned m_improvements = 0;
 	bool m_simulating = false;
-	byte m_steerIndex = 0;
+	ControlNamesData m_controlNames;
 	std::vector<std::vector<unsigned>> m_steerSequences;
+	std::vector<MemSimulationState> m_origStates;
+
+	bool m_settingBruteforce = false;
+	bool m_settingPrintCps = false;
+	bool m_settingInputsSteerFill = false;
+	bool m_settingSearchForever = false;
+	bool m_settingSimDebug = false;
+	double m_settingModifyChance = 0;
+	//int m_settingModifyNumber = 0;
+	int m_settingMaxSteerDiff = 0;
+	int m_settingMaxTimeDiff = 0;
+	int m_settingOverrideStopTime = -1;
+	int m_settingInputsMinTime = -1;
+	int m_settingInputsMaxTime = -1;
+
+	int m_eventsDuration = -1;
 
 	std::random_device rd = std::random_device{};
 	std::default_random_engine rng = std::default_random_engine{ rd() };
 
 	Vec3 m_prevPos;
 
-	void reset();
-	void startSearchPhase();
-	void readInputsFromBuffer(std::vector<TMEvent>& inputs);
-	void preventSimulationEnd(SimulationManager& simManager);
-	void randomNeighbour();
-	void populateSteerSequences();
-
-	void extendSteerInputs();
-
-	void printSaveInputs();
+	void UpdateSettings();
+	void EvaluateAll(SimulationManager& simManager, const int raceTime);
+	void StartInitialPhase();
+	void ResetWithNewSolution(SimulationManager& simManager);
+	void StartNewIteration(SimulationManager& simManager, int rewindTime = -1, const bool printIteration = false);
+	void StartSearchPhase(SimulationManager& simManager);
+	void ReadInputsFromBuffer(SimulationManager& simManager, std::vector<TMEvent>& inputs);
+	int RandomNeighbour(SimulationManager& simManager, const unsigned nCall = 0);
+	bool ProcessTriggers(SimulationManager& manager, const int time, const Vec3& carPos, const Vec3& carVelocity, std::vector<TriggerHit>& hits);
+	bool AskClientForEvaluation(SimulationManager& manager, const int time);
+	void PrintSaveInputs(SimulationManager& simManager, const int score);
 };
 
